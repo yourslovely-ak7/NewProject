@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<link rel="stylesheet" type="text/css" href="login.css">
+</head>
+<body>
+	<div class="header">
+	</div>
+	
+	<div class="container">
+		<h1 id="loginText">
+			Login to Continue.
+		</h1>
+		<div id="loginForm">
+			<label for="username">Username:</label> <input type="text"
+				id="username" name="username" autocomplete="off"
+				placeholder="Enter your username" enterkeyhint="next"><br> <br> <label
+				for="password">Password:</label> <input type="password"
+				id="password" name="password" autocomplete="off"
+				placeholder="Enter your password" enterkeyhint="next"> <br> <br>
+
+			<button onclick="validateLogin()">Login</button>
+		</div>
+		
+		<button style="
+    margin-left: 10vw;
+    margin-top: 5vh;
+    width: 20vw;" onclick="oauthZoho()">Continue with ZOHO</button>
+
+			<button style="
+    margin-left: 10vw;
+    margin-top: 5vh;
+    width: 20vw;" onclick="oauthOurAuth()">Continue with OurAuth</button>
+	</div>
+	
+	
+	<div id="footer">
+		<a href="" class="links">Disclaimer</a> <a href="" class="links">Terms
+			and Conditions</a> <a href="" class="links">Privacy Policy</a> <a href=""
+			class="links">Code of Commitment</a> <span id="cr">Copyright
+			&copy; <span id="currentYear">####</span> Main Bank. All rights reserved</span>
+	</div>
+
+	<div id="headerStyle"></div>
+	<script>
+	
+	function oauthZoho()
+	{
+		window.location.href= "/NewProject/oauth";
+	}
+	
+	function oauthOurAuth()
+	{
+		window.location.href= "/NewProject/oauth/ourauth";
+	}
+
+     document.getElementById("currentYear").textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

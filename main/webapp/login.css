@@ -1,0 +1,134 @@
+@charset "UTF-8";
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url('https://usesignhouse.com/wp-content/uploads/2024/06/63ada8ec1b6f942ad2b6c5f1_zoho.jpeg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    height: 100vh;
+} 
+
+.container {
+    background: #00492187;
+    opacity: 0.8;
+    border-radius: 40vw 0 0 40vw; /* Adjust border-radius with viewport-relative units */
+    width: 50vw; /* Half of the viewport width */
+    height: 100vh;
+    position: absolute;
+    bottom: 0;
+    margin-left: 50%; /* Adjusted for responsiveness */
+}
+
+h1 {
+    font-size: 2.5vw; /* Adjusted font-size for scaling */
+    margin-bottom: 3vh;
+    margin-right: 4vw;
+    margin-top: 15vh;
+    color: #F5F5F5;
+    font-weight: bold;
+}
+
+label {
+    font-size: 1.5vw; /* Adjusted font-size */
+    margin-bottom: 1vh;
+    display: block;
+    color: white;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 60%; /* Scale width relative to the container */ /* Limit max width for larger screens */
+    padding: 1.5vh;
+    margin: 1vh 0;
+    border: none;
+    border-radius: 0.5vh;
+    font-size: 1.2vw; /* Font-size scales with screen */
+    color: #333;
+    border-bottom: 0.3vh solid black;
+    transition: border-bottom-color 2.5s ease;
+}
+
+input:focus {
+    outline: none;
+    border-bottom-color: #002349;
+}
+
+button {
+    width: 15%;
+    padding: 1vh;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-size: 1.5vw;
+    border-radius: 0.7vh;
+    cursor: pointer;
+    font-family: fantasy;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.header {
+    background-color: #f5f5f5;
+    width: 75vw;
+    height: 6.5vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2vh;
+    clip-path: polygon(0 0, 100% 0%, 100% -20%, 80% 100%, 0% 100%);
+    z-index: 3;
+}
+
+#loginText {
+    text-align: right;
+    font-size: 3vw;
+    font-family: cursive;
+}
+
+#loginForm {
+    margin-top: 10vh;
+    margin-left: 10vw;
+}
+
+
+#footer {
+    background-color: #f5f5f5;
+    width: 100%;
+    height: 6vh;
+    position: absolute;
+    bottom: 0;
+    padding-top: 0.8%;
+}
+
+.links {
+	padding-top: 1vh;
+    padding-left: 2vw;
+    font-size: 1vw;
+    text-decoration: none;
+    color: black;
+}
+
+.links:hover {
+    color: #002349;
+}
+
+#cr {
+    padding-left: 35%;
+    font-size: 1vw;
+}
+
+#headerStyle {
+    background-color: #f5f5f5;
+    width: 100%;
+    height: 2.6vh;
+    position: absolute;
+    z-index: 2;
+}

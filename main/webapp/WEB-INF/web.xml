@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+  
+  <display-name>NewProject</display-name>
+  
+  <welcome-file-list>
+    <welcome-file>login.html</welcome-file>
+  </welcome-file-list>
+  
+     <servlet>
+        <servlet-name>OAuthZoho</servlet-name>
+        <servlet-class>auth.OAuthZoho</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAuthZoho</servlet-name>
+        <url-pattern>/oauth</url-pattern>
+    </servlet-mapping>
+      
+     <servlet>
+        <servlet-name>OAuthOurAuth</servlet-name>
+        <servlet-class>auth.OAuthOurAuth</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAuthOurAuth</servlet-name>
+        <url-pattern>/oauth/ourauth</url-pattern>
+    </servlet-mapping>
+    
+     <servlet>
+        <servlet-name>OAuthCallbackZoho</servlet-name>
+        <servlet-class>auth.OAuthCallbackZoho</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAuthCallbackZoho</servlet-name>
+        <url-pattern>/oauthredirect</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>OAuthCallbackOurAuth</servlet-name>
+        <servlet-class>auth.OAuthCallbackOurAuth</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAuthCallbackOurAuth</servlet-name>
+        <url-pattern>/oauthredirect/ourauth</url-pattern>
+    </servlet-mapping>
+    
+	<servlet>
+        <servlet-name>UserDetails</servlet-name>
+        <servlet-class>servlet.UserDetails</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserDetails</servlet-name>
+        <url-pattern>/userdetails</url-pattern>
+    </servlet-mapping>
+    
+</web-app>
