@@ -18,4 +18,16 @@ async function getUserDetails()
 			}
 }
 
+async function logoutUser()
+{
+	const response= await fetch('/NewProject/userdetails',{
+					method: 'POST',
+				})
+				
+				if(response.ok)
+				{
+					window.location.href= '/NewProject/login.html';
+				}
+}
+
 window.onload= getUserDetails();

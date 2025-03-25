@@ -1,49 +1,36 @@
 package helper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import database.DatabaseConnection;
 import exception.InvalidException;
-import pojo.Client;
 import pojo.User;
 import pojo.UserSession;
 
 public class Helper {
 	
-//	private static final String clientId= "1000.LIM0W0QNKWSYXJT396NHID5XDVZADQ";
 	private static final String redirectURIZoho= "http://localhost:8080/NewProject/oauthredirect";
 	private static final String redirectURIOurAuth= "http://localhost:8080/NewProject/oauthredirect/ourauth";
 	
-	public static Client getClient(String authType) throws InvalidException {
-		String query = "Select client_id, client_secret from ClientDetails where authType=?";
-		try (Connection connection = DatabaseConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(query)) 
-		{
-			statement.setString(1, authType);
-			System.out.println(statement);
-			try(ResultSet result = statement.executeQuery())
-			{
-				Client client = new Client();
-				while (result.next()) {
-					client.setClientId(result.getString("client_id"));
-					client.setClientSecret(result.getString("client_secret"));
-					client.setAuthType(authType);
-				}
-				return client;
-			}
-		} catch (SQLException | ClassNotFoundException error) {
-			System.out.println("SQL Exception: " + error.getMessage());
-			throw new InvalidException("Error occurred while fetching from DB.", error);
-		}
-	}
-	
-	public static String getRedirectURIZoho()
+public static String getRedirectURIZoho()
 	{
 		return redirectURIZoho;
 	}
@@ -82,5 +69,93 @@ public class Helper {
 		uSession.setUserId(userId);
 		
 		return uSession;
+	}
+
+	public static JSONObject connectionRequest(String api, String reqType) throws JSONException, IOException
+	{
+		URL url= new URL(api);
+		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod(reqType);
+		connection.setDoOutput(true);
+		connection.setRequestProperty("Accept", "application/json");
+		
+		StringBuilder response= new StringBuilder();
+		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
+		{
+			String line;
+			while((line = reader.readLine()) != null)
+			{
+				response.append(line);
+			}
+		}
+		finally
+		{
+			connection.disconnect();
+		}
+		System.out.println("Response: "+response);
+		
+		return new JSONObject(response.toString());
+	}
+
+	public static JSONObject validateToken(String idToken, String api) throws JSONException, IOException, InvalidException
+	{
+		try
+		{
+			String parts[]= idToken.split("\\.");
+			String header= new String(Base64.getUrlDecoder().decode(parts[0]));
+			JSONObject headerJson= new JSONObject(header);
+			
+			String kId= headerJson.getString("kid");
+			PublicKey publicKey= Helper.getPublicKey(api, kId);
+			
+			String headerAndPayload= parts[0]+"."+parts[1];
+			String signature= parts[2];
+			
+			Signature sign= Signature.getInstance("SHA256withRSA");
+			sign.initVerify(publicKey);
+			sign.update(headerAndPayload.getBytes(StandardCharsets.UTF_8));
+			
+			if(sign.verify(Base64.getUrlDecoder().decode(signature)))
+			{
+				System.out.println("Signature checked!");
+				String payload=  new String(Base64.getUrlDecoder().decode(parts[1]));
+				System.out.println("Header: "+header+"\nPayload: "+ payload);
+				
+				return new JSONObject(payload);
+			}
+			return null;
+			
+		}
+		catch(JSONException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | SignatureException error)
+		{
+			System.out.println(error.getMessage());
+			throw new InvalidException("Error validating ID token.",error);
+		}
+	}
+
+	public static PublicKey getPublicKey(String api, String kId) throws JSONException, IOException, NoSuchAlgorithmException, InvalidKeySpecException
+	{
+		JSONObject jwks= connectionRequest(api, "GET");
+		JSONArray keys= jwks.getJSONArray("keys");
+		
+		int len= keys.length();
+		BigInteger modulus= null,exponent=null;
+		KeyFactory keyFactory=null;
+		
+		for(int i=0; i<len; i++)
+		{
+			JSONObject iter= keys.getJSONObject(i);
+			
+			if(iter.getString("kid").equals(kId))
+			{
+				modulus= new BigInteger(1, Base64.getUrlDecoder().decode(iter.getString("n")));
+				exponent= new BigInteger(1, Base64.getUrlDecoder().decode(iter.getString("e")));
+				keyFactory= KeyFactory.getInstance(iter.getString("kty"));
+				break;
+			}
+		}
+		
+		RSAPublicKeySpec keySpec= new RSAPublicKeySpec(modulus, exponent);
+		return keyFactory.generatePublic(keySpec);
 	}
 }

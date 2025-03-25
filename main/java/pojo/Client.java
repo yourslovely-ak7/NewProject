@@ -5,7 +5,15 @@ public class Client {
 	private String clientId;
 	private String clientSecret;
 	private String authType;
+	private String jwksUrl;
 	
+
+	public String getJwksUrl() {
+		return jwksUrl;
+	}
+	public void setJwksUrl(String jwksUrl) {
+		this.jwksUrl = jwksUrl;
+	}
 	public String getClientId() {
 		return clientId;
 	}

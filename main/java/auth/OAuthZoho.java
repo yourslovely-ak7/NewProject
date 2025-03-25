@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import crud.ClientOperation;
 import exception.InvalidException;
 import helper.Helper;
 
@@ -21,7 +22,7 @@ public class OAuthZoho extends HttpServlet
 			StringBuilder authCodeApi= new StringBuilder();
 			authCodeApi.append("https://accounts.zoho.com/oauth/v2/auth?")
 			.append("response_type=code")
-			.append("&client_id=").append(Helper.getClient("Zoho").getClientId())
+			.append("&client_id=").append(ClientOperation.getClient("Zoho").getClientId())
 			.append("&scope=").append("email ").append("profile")
 			.append("&redirect_uri=").append(Helper.getRedirectURIZoho())
 			.append("&access_type=offline")

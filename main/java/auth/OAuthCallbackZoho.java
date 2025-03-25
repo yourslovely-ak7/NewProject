@@ -1,21 +1,17 @@
 package auth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Base64;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import crud.ClientOperation;
 import crud.UserOperation;
 import exception.InvalidException;
 import helper.Helper;
@@ -39,43 +35,27 @@ public class OAuthCallbackZoho extends HttpServlet
 		
 		try
 		{
-		String authCode= req.getParameter("code");
-//		String location= req.getParameter("location");
-		String server= req.getParameter("accounts-server");
-		String clientSecret="";
+			String authCode= req.getParameter("code");
+	//		String location= req.getParameter("location");
+			String server= req.getParameter("accounts-server");
+			String clientSecret="";
+			
+			Client client= ClientOperation.getClient("Zoho");
+			clientSecret= client.getClientSecret();
+			Helper.checkForNull(clientSecret);
+			
+			StringBuilder tokenApi= new StringBuilder(server);
+			tokenApi.append("/oauth/v2/token?")
+			.append("client_id=").append(client.getClientId())
+			.append("&client_secret=").append(clientSecret)
+			.append("&grant_type=authorization_code")
+			.append("&redirect_uri=").append(Helper.getRedirectURIZoho())
+			.append("&code="+authCode);
+			
+			
+			System.out.println("Token req: "+ tokenApi.toString());
 		
-		Client client= Helper.getClient("Zoho");
-		clientSecret= client.getClientSecret();
-		Helper.checkForNull(clientSecret);
-		
-		StringBuilder tokenApi= new StringBuilder(server);
-		tokenApi.append("/oauth/v2/token?")
-		.append("client_id=").append(client.getClientId())
-		.append("&client_secret=").append(clientSecret)
-		.append("&grant_type=authorization_code")
-		.append("&redirect_uri=").append(Helper.getRedirectURIZoho())
-		.append("&code="+authCode);
-		
-		
-		System.out.println("Token req: "+ tokenApi.toString());
-		URL url= new URL(tokenApi.toString());
-		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Accept", "application/json");
-		
-		StringBuilder response= new StringBuilder();
-		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
-		{
-			String line;
-			while((line = reader.readLine()) != null)
-			{
-				response.append(line);
-			}
-		}
-		System.out.println("Response: "+response);
-
-			JSONObject json= new JSONObject(response.toString());
+			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST");
 			
 			try
 			{
@@ -99,12 +79,13 @@ public class OAuthCallbackZoho extends HttpServlet
 			System.out.println("ID Token: "+ idToken);
 //			System.out.println("Domain: "+ apiDomain);
 			
-			String parts[]= idToken.split("\\.");
-			String header= new String(Base64.getUrlDecoder().decode(parts[0]));
-			String payload=  new String(Base64.getUrlDecoder().decode(parts[1]));
-			System.out.println("Header: "+header+"\nPayload: "+ payload);
+			JSONObject jsonResp= Helper.validateToken(idToken, client.getJwksUrl());
+			Helper.checkForNull(jsonResp);
 			
-			JSONObject jsonResp= new JSONObject(payload);
+			if(jsonResp.getLong("exp") <= System.currentTimeMillis()/1000)
+			{
+				throw new InvalidException("Token Expired!");
+			}
 			
 			User user= Helper.buildUserFromJson(jsonResp);
 			int userId= UserOperation.getUserId(user.getEmail());
@@ -117,13 +98,10 @@ public class OAuthCallbackZoho extends HttpServlet
 			UserSession uSession= Helper.buildUserSession(accessToken, refreshToken, userId);
 			int sessionId= UserOperation.addUserSession(uSession);
 			
-			Cookie userCookie= new Cookie("userId", userId+"");
-			userCookie.setHttpOnly(true);
-			Cookie sessionCookie= new Cookie("sessionId", sessionId+"");
-			sessionCookie.setHttpOnly(true);
+			HttpSession session= req.getSession(true);
+			session.setAttribute("userId", userId);
+			session.setAttribute("sessionId", sessionId);
 			
-			resp.addCookie(userCookie);
-			resp.addCookie(sessionCookie);
 			resp.sendRedirect("dashboard.jsp");
 //			
 //			req.setAttribute("email", jsonResp.getString("email"));

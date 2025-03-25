@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import crud.ClientOperation;
 import exception.InvalidException;
 import helper.Helper;
 
@@ -21,7 +22,7 @@ public class OAuthOurAuth extends HttpServlet
 			StringBuilder authCodeApi= new StringBuilder();
 			authCodeApi.append("http://localhost:8081/OurAuth/auth?")
 			.append("responseType=code")
-			.append("&clientId=").append(Helper.getClient("OurAuth").getClientId())
+			.append("&clientId=").append(ClientOperation.getClient("OurAuth").getClientId())
 			.append("&scope=").append("email ").append("profile")
 			.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth());
 

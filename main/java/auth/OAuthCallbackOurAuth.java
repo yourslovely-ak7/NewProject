@@ -5,17 +5,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Base64;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import crud.ClientOperation;
 import crud.UserOperation;
 import exception.InvalidException;
 import helper.Helper;
@@ -40,43 +40,26 @@ public class OAuthCallbackOurAuth extends HttpServlet
 		System.out.println("Response received to the callback servlet.");
 		try
 		{
-		String authCode= req.getParameter("code");
-//		String location= req.getParameter("location");
-		String server= req.getParameter("accounts-server");
-		String clientSecret="";
-		
-		Client client= Helper.getClient("OurAuth");
-		clientSecret= client.getClientSecret();
-		Helper.checkForNull(clientSecret);
-		
-		StringBuilder tokenApi= new StringBuilder(server);
-		tokenApi.append("/token?")
-		.append("responseType=token")
-		.append("&clientId=").append(client.getClientId())
-		.append("&clientSecret=").append(clientSecret)
-		.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth())
-		.append("&code="+authCode);
-		
-		System.out.println("Token req: "+tokenApi.toString());
-		
-		URL url= new URL(tokenApi.toString());
-		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Accept", "application/json");
-		
-		StringBuilder response= new StringBuilder();
-		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
-		{
-			String line;
-			while((line = reader.readLine()) != null)
-			{
-				response.append(line);
-			}
-		}
-		System.out.println("Response: "+response);
-		
-			JSONObject json= new JSONObject(response.toString());
+			String authCode= req.getParameter("code");
+	//		String location= req.getParameter("location");
+			String server= req.getParameter("apiDomain");
+			String clientSecret="";
+			
+			Client client= ClientOperation.getClient("OurAuth");
+			clientSecret= client.getClientSecret();
+			Helper.checkForNull(clientSecret);
+			
+			StringBuilder tokenApi= new StringBuilder(server);
+			tokenApi.append("/token?")
+			.append("responseType=token")
+			.append("&clientId=").append(client.getClientId())
+			.append("&clientSecret=").append(clientSecret)
+			.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth())
+			.append("&code="+authCode);
+			
+			System.out.println("Token req: "+tokenApi.toString());
+			
+			JSONObject json= connectionRequest(tokenApi.toString(), "POST");
 			
 			try
 			{
@@ -100,12 +83,13 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			System.out.println("ID Token: "+ idToken);
 //			System.out.println("Domain: "+ apiDomain);
 			
-			String parts[]= idToken.split("\\.");
-			String header= new String(Base64.getUrlDecoder().decode(parts[0]));
-			String payload=  new String(Base64.getUrlDecoder().decode(parts[1]));
-			System.out.println("Header: "+header+"\nPayload: "+ payload);
+			JSONObject jsonResp= Helper.validateToken(idToken, client.getJwksUrl());
+			Helper.checkForNull(jsonResp);
 			
-			JSONObject jsonResp= new JSONObject(payload);
+			if(jsonResp.getLong("exp") <= System.currentTimeMillis()/1000)
+			{
+				throw new InvalidException("Token Expired!");
+			}
 			
 			User user= Helper.buildUserFromJson(jsonResp);
 			int userId= UserOperation.getUserId(user.getEmail());
@@ -118,19 +102,42 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			UserSession uSession= Helper.buildUserSession(accessToken, refreshToken, userId);
 			int sessionId= UserOperation.addUserSession(uSession);
 			
-			Cookie userCookie= new Cookie("userId", userId+"");
-			userCookie.setHttpOnly(true);
-			Cookie sessionCookie= new Cookie("sessionId", sessionId+"");
-			sessionCookie.setHttpOnly(true);
+			HttpSession session= req.getSession(true);
+			session.setAttribute("userId", userId);
+			session.setAttribute("sessionId", sessionId);
 			
-			resp.addCookie(userCookie);
-			resp.addCookie(sessionCookie);
-			resp.sendRedirect("dashboard.jsp");
+			resp.sendRedirect("../dashboard.jsp");
 		}
 		catch(JSONException | InvalidException error)
 		{
 			System.out.println("Exception occurred: "+error.getMessage());
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private JSONObject connectionRequest(String api, String reqType) throws JSONException, IOException
+	{
+		URL url= new URL(api);
+		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod(reqType);
+		connection.setDoOutput(true);
+		connection.setRequestProperty("Accept", "application/json");
+		
+		StringBuilder response= new StringBuilder();
+		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
+		{
+			String line;
+			while((line = reader.readLine()) != null)
+			{
+				response.append(line);
+			}
+		}
+		finally
+		{
+			connection.disconnect();
+		}
+		System.out.println("Response: "+response);
+		
+		return new JSONObject(response.toString());
 	}
 }

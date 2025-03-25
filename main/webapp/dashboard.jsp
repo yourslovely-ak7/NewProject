@@ -9,6 +9,7 @@
 <body>
 	<div id="userDetails">
 	</div>
+	<button onclick="logoutUser()">LOG OUT</button>
 		
 	<script src="dashboard.js"></script>
 </body>

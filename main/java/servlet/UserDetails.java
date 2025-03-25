@@ -3,10 +3,10 @@ package servlet;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,16 +21,8 @@ public class UserDetails extends HttpServlet{
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		Cookie cookies[]= req.getCookies();
-		int userId=0;
-		for(Cookie iter: cookies)
-		{
-			if(iter.getName().equals("userId"))
-			{
-				userId= Integer.parseInt(iter.getValue());
-				break;
-			}
-		}
+		HttpSession session= req.getSession(false);
+		int userId=(int) session.getAttribute("userId");
 		
 		try
 		{
@@ -51,4 +43,13 @@ public class UserDetails extends HttpServlet{
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		
+		HttpSession session= req.getSession(false);
+		session.invalidate();
+		resp.setStatus(HttpServletResponse.SC_OK);
+	}
+	
 }
