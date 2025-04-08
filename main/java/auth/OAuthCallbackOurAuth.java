@@ -1,10 +1,6 @@
 package auth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -59,7 +55,7 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			
 			System.out.println("Token req: "+tokenApi.toString());
 			
-			JSONObject json= connectionRequest(tokenApi.toString(), "POST");
+			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST");
 			
 			try
 			{
@@ -90,7 +86,7 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			{
 				throw new InvalidException("Token Expired!");
 			}
-			
+
 			User user= Helper.buildUserFromJson(jsonResp);
 			int userId= UserOperation.getUserId(user.getEmail());
 			
@@ -115,29 +111,29 @@ public class OAuthCallbackOurAuth extends HttpServlet
 		}
 	}
 	
-	private JSONObject connectionRequest(String api, String reqType) throws JSONException, IOException
-	{
-		URL url= new URL(api);
-		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod(reqType);
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Accept", "application/json");
-		
-		StringBuilder response= new StringBuilder();
-		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
-		{
-			String line;
-			while((line = reader.readLine()) != null)
-			{
-				response.append(line);
-			}
-		}
-		finally
-		{
-			connection.disconnect();
-		}
-		System.out.println("Response: "+response);
-		
-		return new JSONObject(response.toString());
-	}
+//	public JSONObject connectionRequest(String api, String reqType) throws JSONException, IOException
+//	{
+//		URL url= new URL(api);
+//		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+//		connection.setRequestMethod(reqType);
+//		connection.setDoOutput(true);
+//		connection.setRequestProperty("Accept", "application/json");
+//		
+//		StringBuilder response= new StringBuilder();
+//		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
+//		{
+//			String line;
+//			while((line = reader.readLine()) != null)
+//			{
+//				response.append(line);
+//			}
+//		}
+//		finally
+//		{
+//			connection.disconnect();
+//		}
+//		System.out.println("Response: "+response);
+//		
+//		return new JSONObject(response.toString());
+//	}
 }

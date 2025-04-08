@@ -23,7 +23,7 @@ public class OAuthOurAuth extends HttpServlet
 			authCodeApi.append("http://localhost:8081/OurAuth/auth?")
 			.append("responseType=code")
 			.append("&clientId=").append(ClientOperation.getClient("OurAuth").getClientId())
-			.append("&scope=").append("email ").append("profile")
+			.append("&scope=").append("email ").append("profile ").append("RESOURCE.all")
 			.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth());
 
 			System.out.println("authCodeReq: "+authCodeApi);

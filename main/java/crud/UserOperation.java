@@ -95,6 +95,54 @@ public class UserOperation {
 		}
 	}
 	
+	public static UserSession getSession(int sessionId, int userId) throws InvalidException
+	{
+		String query= "Select * from UserSession where session_id=? and user_id=?";
+		
+		UserSession sessionEntry= new UserSession();
+		try(Connection connection= DatabaseConnection.getConnection();
+				PreparedStatement statement= connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS))
+		{
+			statement.setInt(1, sessionId);
+			statement.setInt(2, userId);
+			
+			System.out.println(statement);
+			try(ResultSet result = statement.executeQuery())
+			{
+				while(result.next())
+				{
+					sessionEntry.setAccessToken(result.getString("access_token"));
+					sessionEntry.setRefreshToken(result.getString("refresh_token"));
+					sessionEntry.setUserId(result.getInt("user_id"));
+					sessionEntry.setSessionId(result.getInt("session_id"));
+				}
+			}
+			return sessionEntry;
+		} catch (SQLException | ClassNotFoundException error) {
+			System.out.println("SQL Exception: " + error.getMessage());
+			throw new InvalidException("Error occurred while fetching from DB.", error);
+		}
+	}
+	
+	public static boolean updateSession(String aToken, String rToken, int sessionId) throws InvalidException
+	{
+		String query= "Update UserSession set access_token=?, refresh_token=? where session_id=?";
+		try(Connection connection= DatabaseConnection.getConnection();
+				PreparedStatement statement= connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS))
+		{
+			statement.setString(1, aToken);
+			statement.setString(2, rToken);
+			statement.setInt(3, sessionId);
+			
+			int result= statement.executeUpdate();
+			return result==1;
+		}
+		catch (SQLException | ClassNotFoundException error) {
+			System.out.println("SQL Exception: " + error.getMessage());
+			throw new InvalidException("Error occurred while fetching from DB.", error);
+		}
+	}
+	
 	public static User getUser(int userId) throws InvalidException
 	{
 		String query= "Select * from User where user_id=?";

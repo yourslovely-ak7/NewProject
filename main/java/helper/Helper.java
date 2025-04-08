@@ -29,6 +29,7 @@ public class Helper {
 	
 	private static final String redirectURIZoho= "http://localhost:8080/NewProject/oauthredirect";
 	private static final String redirectURIOurAuth= "http://localhost:8080/NewProject/oauthredirect/ourauth";
+	private static final String refreshApi= "http://localhost:8080/NewProject/refresh";
 	
 public static String getRedirectURIZoho()
 	{
@@ -40,6 +41,11 @@ public static String getRedirectURIZoho()
 		return redirectURIOurAuth;
 	}
 
+	public static String getRefreshApi()
+	{
+		return refreshApi;
+	}
+	
 	public static void checkForNull(Object obj) throws InvalidException
 	{
 		if(obj==null)
@@ -75,10 +81,59 @@ public static String getRedirectURIZoho()
 	{
 		URL url= new URL(api);
 		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod(reqType);
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Accept", "application/json");
-		
+		try
+		{
+			connection.setRequestMethod(reqType);
+			connection.setDoOutput(true);
+			connection.setRequestProperty("Accept", "application/json");
+			
+			return sendRequest(connection);
+		}
+		finally
+		{
+			connection.disconnect();
+		}
+	}
+	
+	public static int connectionStatusCode(String api, String reqType) throws JSONException, IOException
+	{
+		URL url= new URL(api);
+		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+		try
+		{
+			connection.setRequestMethod(reqType);
+			connection.setDoOutput(true);
+			connection.setRequestProperty("Accept", "application/json");
+			
+			return connection.getResponseCode();
+		}
+		finally
+		{
+			connection.disconnect();
+		}
+	}
+	
+	public static JSONObject connectionRequestWithToken(String api, String reqType, String aToken) throws JSONException, IOException
+	{
+		URL url= new URL(api);
+		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+		try
+		{
+			connection.setRequestMethod(reqType);
+			connection.setDoOutput(true);
+			connection.setRequestProperty("Accept", "application/json");
+			connection.setRequestProperty("Authorization", "Bearer "+aToken);
+			
+			return sendRequest(connection);
+		}
+		finally
+		{
+			connection.disconnect();
+		}
+	}
+	
+	private static JSONObject sendRequest(HttpURLConnection connection) throws IOException, JSONException
+	{
 		StringBuilder response= new StringBuilder();
 		try(BufferedReader reader= new BufferedReader(new InputStreamReader(connection.getInputStream())))
 		{
@@ -87,10 +142,6 @@ public static String getRedirectURIZoho()
 			{
 				response.append(line);
 			}
-		}
-		finally
-		{
-			connection.disconnect();
 		}
 		System.out.println("Response: "+response);
 		

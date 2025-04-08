@@ -30,4 +30,30 @@ async function logoutUser()
 				}
 }
 
+async function triggerRefresh()
+{
+			const response= await fetch('/NewProject/refresh',{
+				method: 'POST',
+			})
+			
+			if(response.ok)
+			{
+				const data= await response.json();
+				alert(`${data.message}`);
+			}
+}
+
+async function tryAccess()
+{
+			const response= await fetch('/NewProject/access',{
+				method: 'GET',
+			})
+			
+			if(response.ok)
+			{
+				const data= await response.json();
+				alert(`${data.message}`);
+			}
+}
+
 window.onload= getUserDetails();

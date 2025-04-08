@@ -44,12 +44,30 @@
     </servlet-mapping>
     
 	<servlet>
+        <servlet-name>RefreshOurAuth</servlet-name>
+        <servlet-class>auth.RefreshOurAuth</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RefreshOurAuth</servlet-name>
+        <url-pattern>/refresh</url-pattern>
+    </servlet-mapping>
+    
+	<servlet>
         <servlet-name>UserDetails</servlet-name>
         <servlet-class>servlet.UserDetails</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserDetails</servlet-name>
         <url-pattern>/userdetails</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>AccessServlet</servlet-name>
+        <servlet-class>servlet.AccessServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AccessServlet</servlet-name>
+        <url-pattern>/access</url-pattern>
     </servlet-mapping>
     
 </web-app>

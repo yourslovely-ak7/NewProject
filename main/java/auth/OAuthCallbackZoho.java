@@ -23,8 +23,8 @@ import pojo.UserSession;
 public class OAuthCallbackZoho extends HttpServlet
 {
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException 
+	{
 		String errorCode= req.getParameter("error");
 		if(errorCode != null)
 		{
