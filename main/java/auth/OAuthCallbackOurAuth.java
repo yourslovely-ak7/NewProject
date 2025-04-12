@@ -38,7 +38,7 @@ public class OAuthCallbackOurAuth extends HttpServlet
 		{
 			String authCode= req.getParameter("code");
 	//		String location= req.getParameter("location");
-			String server= req.getParameter("apiDomain");
+			String server= req.getParameter("api_domain");
 			String clientSecret="";
 			
 			Client client= ClientOperation.getClient("OurAuth");
@@ -47,10 +47,10 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			
 			StringBuilder tokenApi= new StringBuilder(server);
 			tokenApi.append("/token?")
-			.append("responseType=token")
-			.append("&clientId=").append(client.getClientId())
-			.append("&clientSecret=").append(clientSecret)
-			.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth())
+			.append("response_type=token")
+			.append("&client_id=").append(client.getClientId())
+			.append("&client_secret=").append(clientSecret)
+			.append("&redirect_uri=").append(Helper.getRedirectURIOurAuth())
 			.append("&code="+authCode);
 			
 			System.out.println("Token req: "+tokenApi.toString());
@@ -69,9 +69,9 @@ public class OAuthCallbackOurAuth extends HttpServlet
 				System.out.println("Authorized successfully! Proceeding with data retrieval...");
 			}
 			
-			String accessToken= json.getString("accessToken");
-			String refreshToken= json.getString("refreshToken");
-			String idToken= json.getString("idToken");
+			String accessToken= json.getString("access_token");
+			String refreshToken= json.getString("refresh_token");
+			String idToken= json.getString("id_token");
 //			String apiDomain= json.getString("api_domain");
 			
 			System.out.println("Access Token: "+ accessToken);

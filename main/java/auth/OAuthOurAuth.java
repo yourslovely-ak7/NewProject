@@ -21,10 +21,10 @@ public class OAuthOurAuth extends HttpServlet
 		{
 			StringBuilder authCodeApi= new StringBuilder();
 			authCodeApi.append("http://localhost:8081/OurAuth/auth?")
-			.append("responseType=code")
-			.append("&clientId=").append(ClientOperation.getClient("OurAuth").getClientId())
+			.append("response_type=code")
+			.append("&client_id=").append(ClientOperation.getClient("OurAuth").getClientId())
 			.append("&scope=").append("email ").append("profile ").append("RESOURCE.all")
-			.append("&redirectUrl=").append(Helper.getRedirectURIOurAuth());
+			.append("&redirect_uri=").append(Helper.getRedirectURIOurAuth());
 
 			System.out.println("authCodeReq: "+authCodeApi);
 			resp.setStatus(HttpServletResponse.SC_OK);
