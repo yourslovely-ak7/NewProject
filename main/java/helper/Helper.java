@@ -77,7 +77,7 @@ public static String getRedirectURIZoho()
 		return uSession;
 	}
 
-	public static JSONObject connectionRequest(String api, String reqType) throws JSONException, IOException
+	public static JSONObject connectionRequest(String api, String reqType, String authToken) throws JSONException, IOException
 	{
 		URL url= new URL(api);
 		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
@@ -87,6 +87,10 @@ public static String getRedirectURIZoho()
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Accept", "application/json");
 			
+			if(authToken!= null)
+			{
+				connection.setRequestProperty("Authorization", authToken);
+			}
 			return sendRequest(connection);
 		}
 		finally
@@ -186,7 +190,7 @@ public static String getRedirectURIZoho()
 
 	public static PublicKey getPublicKey(String api, String kId) throws JSONException, IOException, NoSuchAlgorithmException, InvalidKeySpecException
 	{
-		JSONObject jwks= connectionRequest(api, "GET");
+		JSONObject jwks= connectionRequest(api, "GET", null);
 		JSONArray keys= jwks.getJSONArray("keys");
 		
 		int len= keys.length();

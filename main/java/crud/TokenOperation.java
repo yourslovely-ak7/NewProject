@@ -19,14 +19,14 @@ public class TokenOperation {
 				
 		StringBuilder tokenApi= new StringBuilder("http://localhost:8081/OurAuth");
 		tokenApi.append("/token?")
-		.append("responseType=refresh")
-		.append("&clientId=").append(client.getClientId())
-		.append("&clientSecret=").append(client.getClientSecret())
-		.append("&refreshToken=").append(userSession.getRefreshToken());
+		.append("grant_type=refresh_token")
+		.append("&client_id=").append(client.getClientId())
+		.append("&client_secret=").append(client.getClientSecret())
+		.append("&refresh_token=").append(userSession.getRefreshToken());
 		
-		JSONObject response= Helper.connectionRequest(tokenApi.toString(), "POST");
-		System.out.println("New refresh token: "+response.getString("refreshToken"));
+		JSONObject response= Helper.connectionRequest(tokenApi.toString(), "POST", null);
+		System.out.println("New refresh token: "+response.getString("refresh_token"));
 		
-		return UserOperation.updateSession(response.getString("accessToken"), response.getString("refreshToken"), sessionId);
+		return UserOperation.updateSession(response.getString("access_token"), response.getString("refresh_token"), sessionId);
 	}
 }

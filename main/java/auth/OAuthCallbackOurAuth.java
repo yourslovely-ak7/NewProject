@@ -1,6 +1,7 @@
 package auth;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -47,15 +48,16 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			
 			StringBuilder tokenApi= new StringBuilder(server);
 			tokenApi.append("/token?")
-			.append("response_type=token")
-			.append("&client_id=").append(client.getClientId())
-			.append("&client_secret=").append(clientSecret)
+			.append("grant_type=authorization_code")
+//			.append("&client_id=").append(client.getClientId())
+//			.append("&client_secret=").append(clientSecret)
 			.append("&redirect_uri=").append(Helper.getRedirectURIOurAuth())
 			.append("&code="+authCode);
 			
 			System.out.println("Token req: "+tokenApi.toString());
 			
-			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST");
+			String authToken= new String(Base64.getEncoder().encode((client.getClientId()+":"+clientSecret).getBytes()));
+			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST", "Basic "+authToken);
 			
 			try
 			{

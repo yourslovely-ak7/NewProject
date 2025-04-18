@@ -36,6 +36,7 @@ public class OAuthCallbackZoho extends HttpServlet
 		try
 		{
 			String authCode= req.getParameter("code");
+
 	//		String location= req.getParameter("location");
 			String server= req.getParameter("accounts-server");
 			String clientSecret="";
@@ -55,7 +56,7 @@ public class OAuthCallbackZoho extends HttpServlet
 			
 			System.out.println("Token req: "+ tokenApi.toString());
 		
-			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST");
+			JSONObject json= Helper.connectionRequest(tokenApi.toString(), "POST", null);
 			
 			try
 			{
