@@ -37,20 +37,27 @@ public class AccessServlet extends HttpServlet
 			String error= response.optString("error", "no_error");
 			System.out.println("Error: "+ error);
 			
-			if("token_expired".equals(error))
+			if(!error.equals("no_error"))
 			{
-				System.out.println("RT: "+sessionEntry.getRefreshToken()+"\nAT: "+sessionEntry.getAccessToken());
-
-				if(TokenOperation.refreshToken(sessionId, userId))
+				if("token_expired".equals(error))
 				{
-					System.out.println("Token refreshed successfully!");
-					//initiate this request again...
-					req.getRequestDispatcher("/access").forward(req, resp);
-					return;
+					System.out.println("RT: "+sessionEntry.getRefreshToken()+"\nAT: "+sessionEntry.getAccessToken());
+					
+					if(TokenOperation.refreshToken(sessionId, userId))
+					{
+						System.out.println("Token refreshed successfully!");
+						//initiate this request again...
+						req.getRequestDispatcher("/access").forward(req, resp);
+						return;
+					}
+					else
+					{
+						throw new InvalidException("Token cannot be refreshed!");
+					}
 				}
 				else
 				{
-					throw new InvalidException("Token cannot be refreshed!");
+					throw new InvalidException(error);
 				}
 			}
 			
@@ -59,15 +66,16 @@ public class AccessServlet extends HttpServlet
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().write(response.toString());
 		}
-		catch(JSONException | InvalidException error)
+		catch( InvalidException error)
 		{
 			error.printStackTrace();
-			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			resp.getWriter().write("{\"error\": \"" + "Request interrupted!" + "\"}");
+			resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			resp.getWriter().write("{\"error\": \"" + error.getMessage() + "\"}");
 		}
-		catch(IOException error)
+		catch(JSONException |IOException error)
 		{
 			System.out.println("Error: "+ error.getMessage());
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 }

@@ -49,10 +49,14 @@ async function tryAccess()
 				method: 'GET',
 			})
 			
+			const data= await response.json();
 			if(response.ok)
 			{
-				const data= await response.json();
 				alert(`${data.message}`);
+			}
+			else
+			{
+				alert(`${data.error}`);
 			}
 }
 

@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import crud.ClientOperation;
+import crud.TokenOperation;
 import crud.UserOperation;
 import exception.InvalidException;
 import helper.Helper;
@@ -103,6 +104,8 @@ public class OAuthCallbackOurAuth extends HttpServlet
 			HttpSession session= req.getSession(true);
 			session.setAttribute("userId", userId);
 			session.setAttribute("sessionId", sessionId);
+			
+			TokenOperation.introspectToken(sessionId, userId);
 			
 			resp.sendRedirect("../dashboard.jsp");
 		}
